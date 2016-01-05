@@ -3,6 +3,8 @@ package DDG::Goodie::Passphrase;
 
 use strict;
 use DDG::Goodie;
+use Math::Random::MT;
+use Data::Entropy qw(entropy_source);
 
 zci answer_type => 'random_passphrase';
 zci is_cached   => 0;
@@ -36,10 +38,14 @@ handle query_lc => sub {
     # Guard against empty or silly request sizes.
     return unless ($word_count && $word_count <= 10);
 
+    # seed the random generator from shared entropy source
+    my $seed = entropy_source->get_int(9999999);
+    my $gen = Math::Random::MT->new($seed);
+
     my @chosen_words;
     while (scalar @chosen_words < $word_count) {
         # Pick random words from the slurped array until we have enough
-        push @chosen_words, $word_list[int(rand $list_size)];
+        push @chosen_words, $word_list[ int( $gen->rand($list_size) ) ];
     }
 
     my $phrase = join(' ', @chosen_words);
