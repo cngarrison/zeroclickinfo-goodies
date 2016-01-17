@@ -42,13 +42,19 @@ ddg_goodie_test(
 
     'urlencode www.xkcd.com/a-webcomic-of-romance+math+sarcasm+language' => test_zci(build_answer('www.xkcd.com%2Fa-webcomic-of-romance%2Bmath%2Bsarcasm%2Blanguage', 'www.xkcd.com/a-webcomic-of-romance+math+sarcasm+language')),
 
-    'https://example.com/zero#clickinfo^<goodies>;spice:fathead-\ encodeurl' => test_zci(build_answer('https%3A%2F%2Fexample.com%2Fzero%23clickinfo%5E%3Cgoodies%3E%3Bspice%3Afathead-%5C', 'https://example.com/zero#clickinfo^<goodies>;spice:fathead-\\')),
+## TODO - Fix #1888 so that subtitle of structured answer doesn't have to be html_enc first
+#     'https://example.com/zero#clickinfo^<goodies>;spice:fathead-\ encodeurl' => test_zci(build_answer('https%3A%2F%2Fexample.com%2Fzero%23clickinfo%5E%3Cgoodies%3E%3Bspice%3Afathead-%5C', 'https://example.com/zero#clickinfo^<goodies>;spice:fathead-\\')),
+#     'urlescape https://example.org/the answer to "[life], (the universe) .and. <everything>"' => test_zci(build_answer('https%3A%2F%2Fexample.org%2Fthe%20answer%20to%20%22%5Blife%5D%2C%20(the%20universe)%20.and.%20%3Ceverything%3E%22', 'https://example.org/the answer to "[life], (the universe) .and. <everything>"')),
+#     'www.heroku.com/{rawwr!@#$%^&*()+=__} escapeurl' => test_zci(build_answer('www.heroku.com%2F%7Brawwr!%40%23%24%25%5E%26*()%2B%3D__%7D', 'www.heroku.com/{rawwr!@#$%^&*()+=__}')),
+#     'äöü escapeurl' => test_zci(build_answer('%E4%F6%FC', 'äöü')),
 
-    'urlescape https://example.org/the answer to "[life], (the universe) .and. <everything>"' => test_zci(build_answer('https%3A%2F%2Fexample.org%2Fthe%20answer%20to%20%22%5Blife%5D%2C%20(the%20universe)%20.and.%20%3Ceverything%3E%22', 'https://example.org/the answer to "[life], (the universe) .and. <everything>"')),
+    'https://example.com/zero#clickinfo^<goodies>;spice:fathead-\ encodeurl' => test_zci(build_answer('https%3A%2F%2Fexample.com%2Fzero%23clickinfo%5E%3Cgoodies%3E%3Bspice%3Afathead-%5C', 'https://example.com/zero#clickinfo^&lt;goodies&gt;;spice:fathead-\\')),
 
-    'www.heroku.com/{rawwr!@#$%^&*()+=__} escapeurl' => test_zci(build_answer('www.heroku.com%2F%7Brawwr!%40%23%24%25%5E%26*()%2B%3D__%7D', 'www.heroku.com/{rawwr!@#$%^&*()+=__}')),
+    'urlescape https://example.org/the answer to "[life], (the universe) .and. <everything>"' => test_zci(build_answer('https%3A%2F%2Fexample.org%2Fthe%20answer%20to%20%22%5Blife%5D%2C%20(the%20universe)%20.and.%20%3Ceverything%3E%22', 'https://example.org/the answer to &quot;[life], (the universe) .and. &lt;everything&gt;&quot;')),
 
-    'äöü escapeurl' => test_zci(build_answer('%E4%F6%FC', 'äöü')),
+    'www.heroku.com/{rawwr!@#$%^&*()+=__} escapeurl' => test_zci(build_answer('www.heroku.com%2F%7Brawwr!%40%23%24%25%5E%26*()%2B%3D__%7D', 'www.heroku.com/{rawwr!@#$%^&amp;*()+=__}')),
+
+    'äöü escapeurl' => test_zci(build_answer('%E4%F6%FC', '&auml;&ouml;&uuml;')),
 
     'hello there escapeurl' => test_zci(build_answer('hello%20there', 'hello there')),
 );
