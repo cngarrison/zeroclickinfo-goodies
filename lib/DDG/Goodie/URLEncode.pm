@@ -43,7 +43,7 @@ handle remainder => sub {
         name => 'Answer',
         data => {
             title => $encoded_url,
-            subtitle => $subtitle
+            subtitle => html_enc($subtitle)
         },
         templates => {
             group => 'text',

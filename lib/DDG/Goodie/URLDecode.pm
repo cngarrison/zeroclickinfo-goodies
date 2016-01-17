@@ -52,7 +52,7 @@ handle query_raw => sub {
         name => 'Answer',
         data => {
             title => $decoded,
-            subtitle => $subtitle
+            subtitle => html_enc($subtitle)
         },
         templates => {
             group => 'text',
