@@ -5,10 +5,7 @@
       "sourceName" : "Linguanaut",
       "sourceUrl" : "http://www.linguanaut.com/english_bulgarian.htm"
    },
-   "aliases": [
-       "bulgarian phrases", "english to bulgarian", "basic bulgarian phrases", "basic bulgarian"
-   ],
-   "template_type": "reference",
+   "template_type": "language",
    "section_order" : [
       "Basics",
       "Getting Help",

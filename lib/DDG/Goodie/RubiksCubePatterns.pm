@@ -4,20 +4,6 @@ package DDG::Goodie::RubiksCubePatterns;
 use strict;
 use DDG::Goodie;
 
-
-primary_example_queries 'rcube stripes';
-secondary_example_queries 'rcube cube in a cube', 'rcube swap centers';
-description "create interesting patterns from a solved Rubik's Cube";
-name 'Rubiks Cube';
-code_url 'https://github.com/duckduckgo/zeroclickinfo-goodies/blob/master/lib/DDG/Goodie/RubiksCubePatterns.pm';
-category 'random';
-topics 'special_interest';
-source 'http://math.cos.ucf.edu/~reid/Rubik/patterns.html';
-attribution web => ['robert.io', 'Robert Picard'], 
-            twitter => ['__rlp', 'Robert Picard'], 
-            github => ['rpicard', 'Robert Picard'],
-            github => ["https://github.com/Mailkov", "Melchiorre Alastra"];
-
 triggers start =>	"rcube", "rubik", "rubiks", "rubix",
 					"rubicks", "rubik's", "rubic's", "rubick's",
 					"rubik cube", "rubiks cube", "rubic cube", "rubics cube",
@@ -25,6 +11,8 @@ triggers start =>	"rcube", "rubik", "rubiks", "rubix",
 
 zci answer_type => "rubiks_cube";
 zci is_cached   => 1;
+
+my $goodieVersion = $DDG::GoodieBundle::OpenSourceDuckDuckGo::VERSION // 999;
 
 my %patterns = (
     "stripes" => "F U F R L2 B D' R D2 L D' B R2 L F U F",
@@ -38,6 +26,7 @@ my %patterns = (
     "anaconda" => "L U B' U' R L' B R' F B' D R D' F'",
     "python" => "F2 R' B' U R' L F' L F' B D' R B L2",
     "black mamba" => "R D L F' R L' D R' U D' B U' R' D'",
+    "slash" => "R L F B R L F B R L F B",
 );
 
 sub to_titlecase($)
@@ -63,40 +52,55 @@ handle remainder_lc => sub {
     #hack for the trigger "rubiks cube in a cube"
     s/^in a cube/cube in a cube/;
 	
-    my %patterns_answer;
+    my @items;
     my $output;
     my $title;
-    my $subtitle;
     
     if ($patterns{$_}) {
         $output = render_text($_);
         $title = $patterns{$_};
-        $subtitle = "Rubiks cube '" . to_titlecase($_) . "' pattern";
+        my $subtitle = "Rubiks cube '" . to_titlecase($_) . "' pattern";
+        my $filename = get_file_name($_);
+        @items = {
+            title => $title,
+            description => $subtitle,
+            image => $filename
+        };
     } else {
         return if ($_ ne 'patterns');
         foreach my $pattern (keys %patterns) {
             $output .= render_text($pattern);
+            my %result = (
+                title => to_titlecase($pattern) . " pattern",
+                description => $patterns{$pattern},
+                image => get_file_name($pattern),
+            );
+            $title = $patterns{$_};
+            push @items, \%result;
         }
-        $title = 'Rubiks cube patterns';
-        %patterns_answer = %patterns;
     }
 
     return $output,
     structured_answer => {
         id => 'rubiks_cube_patterns',
         name => 'Answer',
-        data => {
-            title => $title,
-            subtitle => $subtitle,
-            record_data => \%patterns_answer,
-        },
+        data => \@items,
         templates => {
-            group => 'list',
-            options => {
-                content => 'record',
+            group => 'info',
+            variants => {
+                tile => 'poster'
             }
         }
      };
 };
 
 1;
+
+sub get_file_name {
+    my $fn = shift;
+    #e.g transforms "swap centers" into "swap_centers"
+    $fn =~ s/ /_/g;
+    #e.g transforms "t's" into "ts"
+    $fn =~ s/'//g;
+    return "/share/goodie/rubiks_cube_patterns/$goodieVersion/$fn.svg";
+}
