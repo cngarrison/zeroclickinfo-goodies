@@ -69,18 +69,18 @@ handle remainder_lc => sub {
     srand();
 
     my @values = split(' and ', $_);
-    my $values = @values; # size of @values;
+    my $num_values = @values; # size of @values;
     my $out = '';
     my $diceroll;
     my @result;
     my $heading = "Random Dice Roll";
     my $total; # total of all dice rolls
     foreach (@values) {
-        if ($_ =~ /^(?:a? ?die|(\d{0,2})\s*dic?e)$/) {
+        if ($_ =~ /^((a\s+)?die|(?<dnum>\d{0,2})\s*dic?e)$/) {
             # ex. 'a die', '2 dice', '5dice'
             my @output;
             my $sum = 0;
-            my $number_of_dice = set_num_dice($1, 2); # set number of dice, default 2
+            my $number_of_dice = set_num_dice($+{dnum}, 2); # set number of dice, default 2
             my $number_of_faces = 6; # number of utf8_dice
             for (1 .. $number_of_dice) { # for all rolls
                 my $roll = roll_die( $number_of_faces ); # roll the die
@@ -96,17 +96,17 @@ handle remainder_lc => sub {
                 'isdice' => 1
             };
         }
-        elsif ($_ =~ /^(\d*)[d|w](\d+)\s?([+-])?\s?(\d+|[lh])?$/) {
+        elsif ($_ =~ /^(?<dnum>\d*)[dw](?<dface>\d+)\s?(?<dop>[+-])?\s?(?<dadd>\d+|[lh])?$/) {
             # ex. '2d8', '2w6 - l', '3d4 + 4', '3d4-l'
             # 'w' is the German form of 'd'
             my (@rolls, $output);
-            my $number_of_dice = set_num_dice($1, 1); # set number of dice, default 1
+            my $number_of_dice = set_num_dice($+{dnum}, 1); # set number of dice, default 1
             # check that input is not greater than or equal to 99
             # check that input is not 0. ex. 'roll 0d3' should not return a value
-            if( $number_of_dice >= 100 or $1 eq '0'){
+            if( $number_of_dice >= 100 or $+{dnum} eq '0'){
                 return; # do not continue if conditions not met
             }
-            my $min = my $number_of_faces = $2; # set min and number_of_faces to max possible roll
+            my $min = my $number_of_faces = $+{dface}; # set min and number_of_faces to max possible roll
             my $max = my $sum = 0; # set max roll and sum to -
             for (1 .. $number_of_dice) { # for each die
                 my $roll = roll_die( $number_of_faces ); # roll the die
@@ -114,24 +114,24 @@ handle remainder_lc => sub {
                 $max = $roll if $roll > $max; # record max roll
                 push @rolls, $roll; # add roll to array rolls
             }
-            if (defined($3) && defined($4)) {
+            if (defined($+{dop}) && defined($+{dadd})) {
                 # handle special case of " - L" or " - H"
-                if ($3 eq '-' && ($4 eq 'l' || $4 eq 'h')) {
-                    if ($4 eq 'l') {
+                if ($+{dop} eq '-' && ($+{dadd} eq 'l' || $+{dadd} eq 'h')) {
+                    if ($+{dadd} eq 'l') {
                         push(@rolls, -$min); # add -min roll to array rolls
                     } else {
                         push(@rolls, -$max); # add -max roll to array rolls
                     }
-                } elsif ($3 eq '+' && ($4 eq 'l' || $4 eq 'h')) { # do nothing with '3d5+h'
+                } elsif ($+{dop} eq '+' && ($+{dadd} eq 'l' || $+{dadd} eq 'h')) { # do nothing with '3d5+h'
                     return;
                 } else {
-                    push(@rolls, int("$3$4")); # ex. '-4', '+3'
+                    push(@rolls, int("$+{dop}$+{dadd}")); # ex. '-4', '+3'
                 }
             }
             for (@rolls) {
                 $sum += $_; # track sum
             }
-            my $roll_output = shorthand_roll_output( \@rolls, $sum, $values ); # initialize roll_output
+            my $roll_output = shorthand_roll_output( \@rolls, $sum, $num_values ); # initialize roll_output
             $out .= $roll_output; # add roll_output to our result
             push @result, {
                 'sum' => $sum,
@@ -155,7 +155,7 @@ handle remainder_lc => sub {
         subtitle_content => 'DDH.dice.subtitle_content'
     };
     
-    if ($values > 1) {
+    if ($num_values > 1) {
         # display total sum if more than one value was specified
         $out .= 'Total: ' . $total;
         $group = 'list';
