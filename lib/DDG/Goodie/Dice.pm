@@ -23,7 +23,7 @@ my %utf8_dice = (
 # param $_[0] number of faces
 # return roll
 sub roll_die {
-    return int(rand($_[0])) + 1 if $_;
+    return rand_int($_[0]) + 1 if $_[0];
 }
 
 # set_num_dice set the number of dice to be rolled
@@ -66,21 +66,36 @@ sub shorthand_roll_output {
 
 handle remainder_lc => sub {
     # Ensure rand is seeded for each process
-    srand();
+#     srand();
 
-    my @values = split(' and ', $_);
+    my $remainder = shift;
+    warn "remainder[1]: '$remainder'\n";
+
+    $remainder =~ s/\s*(?<dtimes>\d{0,2})\s*times?\s*//;
+    warn "$+{dtimes} times\n" if $+{dtimes};
+    warn "remainder[2]: '$remainder'\n" if $+{dtimes};
+#     if ($remainder =~ s/(?<dtimes>\d{0,2})\s*times?//) {
+#     	warn "$+{dtimes}\n";
+#     }
+    
+
+    my @values = split(' and ', $remainder);
+    warn "values: '".join('-',@values)."'\n";
     my $num_values = @values; # size of @values;
     my $out = '';
     my $diceroll;
     my @result;
     my $heading = "Random Dice Roll";
     my $total; # total of all dice rolls
-    foreach (@values) {
-        if ($_ =~ /^((a\s+)?die|(?<dnum>\d{0,2})\s*dic?e)$/) {
+    foreach my $val (@values) {
+        warn "val: '$val'\n";
+        if ($val =~ /^((a\s+)?die|(?<dnum>\d{0,2})\s*dic?e)$/) {
             # ex. 'a die', '2 dice', '5dice'
+            warn "dnum: $+{dnum}\n" if $+{dnum};
             my @output;
             my $sum = 0;
             my $number_of_dice = set_num_dice($+{dnum}, 2); # set number of dice, default 2
+            warn "number_of_dice: $number_of_dice\n";
             my $number_of_faces = 6; # number of utf8_dice
             for (1 .. $number_of_dice) { # for all rolls
                 my $roll = roll_die( $number_of_faces ); # roll the die
@@ -96,7 +111,7 @@ handle remainder_lc => sub {
                 'isdice' => 1
             };
         }
-        elsif ($_ =~ /^(?<dnum>\d*)[dw](?<dface>\d+)\s?(?<dop>[+-])?\s?(?<dadd>\d+|[lh])?$/) {
+        elsif ($val =~ /^(?<dnum>\d*)[dw](?<dface>\d+)\s?(?<dop>[+-])?\s?(?<dadd>\d+|[lh])?$/) {
             # ex. '2d8', '2w6 - l', '3d4 + 4', '3d4-l'
             # 'w' is the German form of 'd'
             my (@rolls, $output);
@@ -176,8 +191,17 @@ handle remainder_lc => sub {
         data => $data,
         templates => {
             group => $group,
-            options => $options
-        }
+            options => $options,
+            
+            detail: 0,
+            
+        },
+        
+        
+        meta => {
+            searchTerm => '',
+            itemType => 'turns',
+        },
    };
     
 };
