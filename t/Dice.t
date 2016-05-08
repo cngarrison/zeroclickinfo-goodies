@@ -352,6 +352,21 @@ ddg_goodie_test(
             }
        }
     ),
+    'throw dice 2 times' => test_zci(
+        qr/^., .$/,
+        structured_answer => {
+            id => 'dice',
+            name => 'Answer',
+            data => '-ANY-',
+            templates => {
+                group => 'text',
+                options => {
+                    subtitle_content => 'DDH.dice.subtitle_content'
+                }
+            }
+       }
+    ),
+
 );
 
 done_testing;
